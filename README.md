@@ -77,11 +77,12 @@ To regenerate or extend it, use the Search-R1
 [`nq_search.py`](https://github.com/PeterGriffinJin/Search-R1/blob/main/scripts/data_process/nq_search.py)
 preprocessing script.
 
-### 3) Start the DrMAS SearchR1 local retrieval service
+### 3) Start the DrMAS SearchR1 retrieval service
 
 `faiss-gpu` cannot be installed with pip, so the retrieval server needs its own
-conda environment. The server uses roughly 6 GB of GPU memory per GPU; account
-for that when sizing training resources.
+conda environment. Deploy it on separate machine/GPU resources from the training
+system; the MAS communicates with it over HTTP. The server uses roughly 6 GB of
+GPU memory per GPU on the retrieval host.
 
 #### 3.1) Create the retriever environment
 
@@ -107,7 +108,7 @@ cat $local_dir/part_* > $local_dir/e5_Flat.index
 gzip -d $local_dir/wiki-18.jsonl.gz
 ```
 
-#### 3.3) Start the local e5 retrieval service
+#### 3.3) Start the e5 retrieval service
 
 ```bash
 conda activate retriever
@@ -124,18 +125,18 @@ python scripts/retrieval_server.py \
   > retrieval_server.log
 ```
 
-Point the MAS at the service (recommended):
+Point the MAS at the service:
 
 ```bash
-export SEARCH_MAS_RETRIEVAL_SERVICE_URL=http://127.0.0.1:8010/retrieve
+export SEARCH_MAS_RETRIEVAL_SERVICE_URL=http://<retrieval-host>:8010/retrieve
 ```
 
-> **Note:** When this application runs as the external MAS for uni-agent, the
-> MAS process is started on a Ray worker, so `127.0.0.1` refers to that worker
-> node. If the retrieval service runs elsewhere, set
-> `SEARCH_MAS_RETRIEVAL_SERVICE_URL` to an address reachable from the worker
-> (inject it through `launcher_kwargs.command.env` in the uni-agent Task
-> Config).
+> **Note:** When this application runs as the external MAS for uni-agent, deploy
+> the retrieval service on a separate host and set
+> `SEARCH_MAS_RETRIEVAL_SERVICE_URL` to an address reachable from the Ray workers
+> that run the MAS (inject it through `launcher_kwargs.command.env` in the
+> uni-agent Task Config). `127.0.0.1` would refer to the worker node itself, so
+> do not use it unless the service runs there.
 
 Quick check:
 
@@ -227,7 +228,7 @@ Key fields in `configs/search_mas_example.yaml`:
     `SEARCH_MAS_LLM_API_KEY`, `SEARCH_MAS_LLM_MODEL`.
   - Compatible aliases: `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL`.
 - `search.retrieval_service_url`: retrieval service address (compatible with
-  the DrMAS Search-R1 local retrieval service).
+  the DrMAS Search-R1 retrieval service).
   - Recommended env override: `SEARCH_MAS_RETRIEVAL_SERVICE_URL`.
 - `application.max_turns`: maximum number of multi-turn steps.
 - `agents.<agent>.llm.*`: per-agent backend overrides for
