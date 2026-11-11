@@ -18,6 +18,7 @@ search_mas_app
 ├── configs/
 │   ├── inference.yaml          # multi_policy training subprocess template
 │   └── search_mas_example.yaml # standalone example config
+├── LICENSE
 ├── requirements.txt
 ├── scripts/
 │   ├── deploy_searchr1_retrieval_service.sh
@@ -260,3 +261,17 @@ search:
   provider: http
   retrieval_service_url: ${SEARCH_MAS_RETRIEVAL_SERVICE_URL}
 ```
+
+## License
+
+The code in this repository is licensed under the Apache License 2.0; see
+[LICENSE](LICENSE).
+
+Portions of `scripts/retrieval_server.py` derive from
+[Search-R1](https://github.com/PeterGriffinJin/Search-R1), also licensed under
+Apache-2.0.
+
+The bundled datasets derive from Search-R1's
+[`PeterJinGo/nq_hotpotqa_train`](https://huggingface.co/datasets/PeterJinGo/nq_hotpotqa_train)
+(NQ + HotpotQA). They are not covered by the Apache-2.0 license; refer to the
+upstream dataset for its terms.
